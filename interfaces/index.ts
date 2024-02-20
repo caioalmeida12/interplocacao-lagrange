@@ -15,6 +15,9 @@ export { DataPointSchema };
 export type DataPoint = z.infer<typeof DataPointSchema>;
 
 const LagrangePolynomialSchema = z.object({
-  polynomial: z.string(),
+  polynomialString: z.string(),
   wishedX: z.number(),
 });
+
+export { LagrangePolynomialSchema }
+export type LagrangePolynomial = z.infer<typeof LagrangePolynomialSchema>
