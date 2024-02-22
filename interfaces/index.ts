@@ -7,8 +7,8 @@
 import { z } from 'zod';
 
 const DataPointSchema = z.object({
-  x: z.number(),
-  y: z.number(),
+  x: z.preprocess((val) => Number(val), z.number()),
+  y: z.preprocess((val) => Number(val), z.number()),
 });
 
 export { DataPointSchema };
@@ -16,7 +16,7 @@ export type DataPoint = z.infer<typeof DataPointSchema>;
 
 const LagrangePolynomialSchema = z.object({
   polynomialString: z.string(),
-  wishedX: z.number(),
+  wishedX: z.preprocess((val) => Number(val), z.number()),
 });
 
 export { LagrangePolynomialSchema }

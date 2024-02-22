@@ -4,49 +4,55 @@ import { DataPoint, DataPointSchema, LagrangePolynomial, LagrangePolynomialSchem
 import * as math from 'mathjs';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method === 'POST') {
-        const bodyDataPoints: unknown[] = req.body;
+    try {
+        if (req.method === 'POST') {
+            const bodyDataPoints: unknown[] = req.body;
 
-        const dataPoints: DataPoint[] = bodyDataPoints.map((dataPoint) => DataPointSchema.parse(dataPoint));
+            const dataPoints: DataPoint[] = bodyDataPoints.map((dataPoint) => DataPointSchema.parse(dataPoint));
 
-        const getLnFunctionAsString = (n: number, dataPoints: DataPoint[]) => {
-            const datapointsExcludingN = dataPoints.filter((_, i) => i !== n);
+            const getLnFunctionAsString = (n: number, dataPoints: DataPoint[]) => {
+                const datapointsExcludingN = dataPoints.filter((_, i) => i !== n);
 
-            const denominator = datapointsExcludingN.reduce((acc, dataPoint) => {
-                return acc * (dataPoints[n].x - dataPoint.x);
-            }, 1);
+                const denominator = datapointsExcludingN.reduce((acc, dataPoint) => {
+                    return acc * (dataPoints[n].x - dataPoint.x);
+                }, 1);
 
-            const numerator = datapointsExcludingN.reduce((acc, dataPoint) => {
-                return acc + `(x - ${dataPoint.x})`;
+                const numerator = datapointsExcludingN.reduce((acc, dataPoint) => {
+                    return acc + `(x - ${dataPoint.x})`;
+                }, '');
+
+                return `${numerator} / ${denominator}`;
+            }
+
+            const composedPolynomial = dataPoints.reduce((acc, dataPoint, i) => {
+                const ln = getLnFunctionAsString(i, dataPoints);
+
+                return `${acc} + ${dataPoint.y} * (${ln})`;
             }, '');
 
-            return `${numerator} / ${denominator}`;
+            return res.status(200).json({
+                polynomial: math.simplify(composedPolynomial).toString(),
+                dataPoints: dataPoints
+            });
         }
 
-        const composedPolynomial = dataPoints.reduce((acc, dataPoint, i) => {
-            const ln = getLnFunctionAsString(i, dataPoints);
+        if (req.method === 'GET') {
+            const polynomial: LagrangePolynomial = LagrangePolynomialSchema.parse(req.query)
 
-            return `${acc} + ${dataPoint.y} * (${ln})`;
-        }, '');
+            const compiledPolynomial = math.compile(polynomial.polynomialString);
 
-        return res.status(200).json({
-            polynomial: math.simplify(composedPolynomial).toString(),
-            dataPoints: dataPoints
-        });
+            const wishedX = polynomial.wishedX;
+
+            return res.status(200).json({
+                wishedX,
+                wishedY: compiledPolynomial.evaluate({ x: wishedX })
+            });
+        }
+    } catch (error) {
+        return res.status(500).json({ error });
     }
 
-    if (req.method === 'GET') {
-        const polynomial: LagrangePolynomial = LagrangePolynomialSchema.parse(req.body)
 
-        const compiledPolynomial = math.compile(polynomial.polynomialString);
-
-        const wishedX = polynomial.wishedX;
-
-        return res.status(200).json({
-            wishedX,
-            wishedY: compiledPolynomial.evaluate({ x: wishedX })
-        });
-    }
 
     return res.status(405).json({ error: 'Method not allowed' });
 }
