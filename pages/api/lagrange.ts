@@ -6,7 +6,7 @@ import * as math from 'mathjs';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         if (req.method === 'POST') {
-            const bodyDataPoints: unknown[] = req.body;
+            const bodyDataPoints: unknown[] = JSON.parse(req.body);
 
             const dataPoints: DataPoint[] = bodyDataPoints.map((dataPoint) => DataPointSchema.parse(dataPoint));
 
@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }, '');
 
             return res.status(200).json({
-                polynomial: math.simplify(composedPolynomial).toString(),
+                polynomialString: math.simplify(composedPolynomial).toString(),
                 dataPoints: dataPoints
             });
         }
@@ -49,6 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             });
         }
     } catch (error) {
+        console.error(error)
         return res.status(500).json({ error });
     }
 
