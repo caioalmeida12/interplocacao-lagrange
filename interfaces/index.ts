@@ -1,11 +1,6 @@
-// You can include shared interfaces/types in a separate file
-// and then use them in any component by importing them. For
-// example, to import the interface below do:
-//
-// import { User } from 'path/to/interfaces';
-
 import { z } from 'zod';
 
+// DataPointSchema = Ponto no gráfico, definido por X e Y
 const DataPointSchema = z.object({
   x: z.preprocess((val) => Number(val), z.number()),
   y: z.preprocess((val) => Number(val), z.number()),
@@ -14,6 +9,7 @@ const DataPointSchema = z.object({
 export { DataPointSchema };
 export type DataPoint = z.infer<typeof DataPointSchema>;
 
+// LagrangePolynomialSchema = Valor do input enviado pelo usuário, onde polyomialString é a equação e wishedX é o valor de x desejado
 const LagrangePolynomialSchema = z.object({
   polynomialString: z.string(),
   wishedX: z.preprocess((val) => Number(val), z.number()),

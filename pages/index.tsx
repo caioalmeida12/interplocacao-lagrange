@@ -6,6 +6,7 @@ const IndexPage: React.FC = () => {
   const [resultadoResolver, setResultadoResolver] = useState("");
   const [resultadoInterpolador, setResultadoInterpolador] = useState("");
 
+  // Quando apertar o botão resolver para resolver y em função de x
   const handleResolverSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -13,6 +14,7 @@ const IndexPage: React.FC = () => {
 
     const query = new URLSearchParams(formData as any).toString();
 
+    // Envia os dados para resolução e mostra o resultado quando receber
     try {
       fetch(`/api/lagrange?${query}`)
         .then((response) => response.json())
@@ -23,6 +25,7 @@ const IndexPage: React.FC = () => {
     }
   }
 
+  // Quando apertar o botão resolver para descobrir a função interpoladora
   const handleInterpoladorSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -43,6 +46,7 @@ const IndexPage: React.FC = () => {
       },
     ]
 
+    // Envia os dados para resolução e mostra o resultado quando receber
     try {
       fetch(`/api/lagrange/`, {
         method: "POST",
